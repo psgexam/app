@@ -1,0 +1,281 @@
+-------------------------------------------------------------------------------------------------------------------
+ToDo using Flutter
+-------------------------------------------------------------------------------------------------------------------
+
+STEPS:
+Open android studio
+Create a new flutter project
+Paste the code
+
+
+---------
+main.dart
+---------
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class Todo {
+  final String id;
+  final String text;
+  bool completed;
+
+  Todo({required this.id, required this.text, this.completed = false});
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Todo List App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: TodoListScreen(),
+    );
+  }
+}
+
+class TodoListScreen extends StatefulWidget {
+  @override
+  _TodoListScreenState createState() => _TodoListScreenState();
+}
+
+class _TodoListScreenState extends State<TodoListScreen> {
+  List<Todo> tasks = [];
+  TextEditingController taskController = TextEditingController();
+
+  void addTask() {
+    String taskText = taskController.text.trim();
+    if (taskText.isNotEmpty) {
+      setState(() {
+        tasks.add(Todo(id: DateTime.now().toString(), text: taskText));
+        taskController.clear();
+      });
+    }
+  }
+
+  void toggleTask(String taskId) {
+    setState(() {
+      tasks = tasks.map((task) {
+        if (task.id == taskId) {
+          task.completed = !task.completed;
+        }
+        return task;
+      }).toList();
+    });
+  }
+
+  void removeTask(String taskId) {
+    setState(() {
+      tasks.removeWhere((task) => task.id == taskId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Todo List'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: taskController,
+              decoration: InputDecoration(labelText: 'Enter your task'),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: addTask,
+              child: Text('Add Task'),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: tasks.length,
+                itemBuilder: (context, index) {
+                  Todo task = tasks[index];
+                  return ListTile(
+                    title: Text(
+                      task.text,
+                      style: TextStyle(
+                        decoration: task.completed ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    leading: Checkbox(
+                      value: task.completed,
+                      onChanged: (value) => toggleTask(task.id),
+                    ),
+                    onLongPress: () => removeTask(task.id),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+Execution:
+flutter run (or) press run button
+-------------------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------------------------------------------
+Expense using Flutter
+-------------------------------------------------------------------------------------------------------------------
+
+STEPS:
+Open android studio
+Create a new flutter project
+Paste the code
+
+
+---------
+main.dart
+---------
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class Transaction {
+  final String id;
+  final String title;
+  final double amount;
+  final DateTime date;
+  final String category;
+
+  Transaction({
+    required this.id,
+    required this.title,
+    required this.amount,
+    required this.date,
+    required this.category,
+  });
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Expense Manager',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: ExpenseManager(),
+    );
+  }
+}
+
+class ExpenseManager extends StatefulWidget {
+  @override
+  _ExpenseManagerState createState() => _ExpenseManagerState();
+}
+
+class _ExpenseManagerState extends State<ExpenseManager> {
+  List<Transaction> transactions = [];
+
+  TextEditingController titleController = TextEditingController();
+  TextEditingController amountController = TextEditingController();
+  TextEditingController categoryController = TextEditingController();
+
+  void addTransaction() {
+    String title = titleController.text;
+    double amount = double.tryParse(amountController.text) ?? 0.0;
+    String category = categoryController.text;
+
+    if (title.isNotEmpty && amount > 0) {
+      setState(() {
+        transactions.add(Transaction(
+          id: DateTime.now().toString(),
+          title: title,
+          amount: amount,
+          date: DateTime.now(),
+          category: category,
+        ));
+        titleController.clear();
+        amountController.clear();
+        categoryController.clear();
+      });
+    }
+  }
+
+  Map<String, double> calculateWeeklySummary() {
+    Map<String, double> summary = {};
+
+    transactions.forEach((transaction) {
+      if (transaction.date.isAfter(DateTime.now().subtract(Duration(days: 7)))) {
+        if (summary.containsKey(transaction.category)) {
+          summary[transaction.category]! += transaction.amount;
+        } else {
+          summary[transaction.category] = transaction.amount;
+        }
+      }
+    });
+
+    return summary;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Expense Manager'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: amountController,
+              decoration: InputDecoration(labelText: 'Amount'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: categoryController,
+              decoration: InputDecoration(labelText: 'Category'),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: addTransaction,
+              child: Text('Add Transaction'),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Weekly Summary',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              child: ListView(
+                children: calculateWeeklySummary().entries.map((entry) {
+                  return ListTile(
+                    title: Text('${entry.key}: \$${entry.value.toStringAsFixed(2)}'),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+Execution:
+flutter run (or) press run button
+-------------------------------------------------------------------------------------------------------------------
