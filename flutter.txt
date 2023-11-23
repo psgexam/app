@@ -12,112 +12,94 @@ Paste the code
 main.dart
 ---------
 import 'package:flutter/material.dart';
-
 void main() {
   runApp(MyApp());
 }
-
-class Todo {
-  final String id;
-  final String text;
-  bool completed;
-
-  Todo({required this.id, required this.text, this.completed = false});
-}
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Todo List App',
+      title: 'Flutter Todo App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: TodoListScreen(),
+      home: TodoScreen(),
     );
   }
 }
-
-class TodoListScreen extends StatefulWidget {
+class TodoScreen extends StatefulWidget {
   @override
-  _TodoListScreenState createState() => _TodoListScreenState();
+  _TodoScreenState createState() => _TodoScreenState();
 }
-
-class _TodoListScreenState extends State<TodoListScreen> {
-  List<Todo> tasks = [];
-  TextEditingController taskController = TextEditingController();
-
-  void addTask() {
-    String taskText = taskController.text.trim();
-    if (taskText.isNotEmpty) {
-      setState(() {
-        tasks.add(Todo(id: DateTime.now().toString(), text: taskText));
-        taskController.clear();
-      });
-    }
-  }
-
-  void toggleTask(String taskId) {
-    setState(() {
-      tasks = tasks.map((task) {
-        if (task.id == taskId) {
-          task.completed = !task.completed;
-        }
-        return task;
-      }).toList();
-    });
-  }
-
-  void removeTask(String taskId) {
-    setState(() {
-      tasks.removeWhere((task) => task.id == taskId);
-    });
-  }
-
+class _TodoScreenState extends State<TodoScreen> {
+  List<String> tasks = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Todo List'),
+        title: Text('Todo App'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: taskController,
-              decoration: InputDecoration(labelText: 'Enter your task'),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(tasks[index]),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      setState(() {
+                        tasks.removeAt(index);
+                      });
+                    },
+                  ),
+                );
+              },
             ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: addTask,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: _addTask,
               child: Text('Add Task'),
             ),
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  Todo task = tasks[index];
-                  return ListTile(
-                    title: Text(
-                      task.text,
-                      style: TextStyle(
-                        decoration: task.completed ? TextDecoration.lineThrough : null,
-                      ),
-                    ),
-                    leading: Checkbox(
-                      value: task.completed,
-                      onChanged: (value) => toggleTask(task.id),
-                    ),
-                    onLongPress: () => removeTask(task.id),
-                  );
-                },
-              ),
+          ),
+        ],
+      ),
+    );
+  }
+  void _addTask() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController _taskController = TextEditingController();
+        return AlertDialog(
+          title: Text('Add Task'),
+          content: TextField(
+            controller: _taskController,
+            decoration: InputDecoration(hintText: 'Enter your task'),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  tasks.add(_taskController.text);
+                });
+                Navigator.pop(context);
+              },
+              child: Text('Add'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }
