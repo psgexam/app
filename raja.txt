@@ -1,0 +1,117 @@
+
+
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
+
+const WeeklyTracker = () => {
+  const [dailyEntries, setDailyEntries] = useState([]);
+  const [dailyAmount, setDailyAmount] = useState('');
+  const [selectedDay, setSelectedDay] = useState('');
+
+  const addEntry = () => {
+    if (dailyAmount && selectedDay) {
+      const newEntry = {
+        day: selectedDay,
+        amount: parseFloat(dailyAmount),
+      };
+
+      setDailyEntries([...dailyEntries, newEntry]);
+      setDailyAmount('');
+      setSelectedDay('');
+    }
+  };
+
+  const calculateWeeklyTotal = () => {
+    return dailyEntries.reduce((total, entry) => total + entry.amount, 0);
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Weekly Income Expense Tracker</Text>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Amount"
+          keyboardType="numeric"
+          value={dailyAmount}
+          onChangeText={(text) => setDailyAmount(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Day (e.g., Monday)"
+          value={selectedDay}
+          onChangeText={(text) => setSelectedDay(text)}
+        />
+        <Button title="Add Entry" onPress={addEntry} />
+      </View>
+
+      <View style={styles.entriesContainer}>
+        <Text style={styles.entriesHeader}>Weekly Entries</Text>
+        <FlatList
+          data={dailyEntries}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.entryItem}>
+              <Text>{`${item.day}: $${item.amount.toFixed(2)}`}</Text>
+            </View>
+          )}
+        />
+      </View>
+
+      <View style={styles.summaryContainer}>
+        <Text style={styles.summaryText}>Weekly Total:</Text>
+        <Text style={styles.totalAmount}>{`$${calculateWeeklyTotal().toFixed(2)}`}</Text>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    padding: 10,
+  },
+  entriesContainer: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  entriesHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  entryItem: {
+    marginBottom: 10,
+  },
+  summaryContainer: {
+    alignItems: 'center',
+  },
+  summaryText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  totalAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+});
+
+export default WeeklyTracker;
